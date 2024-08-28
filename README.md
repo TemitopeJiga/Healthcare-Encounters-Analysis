@@ -11,4 +11,4 @@ This repository examines Healthcare Encounter Analysis for the year 2019
 - [Limitations](#limitations)
 - [References](#references)
 
-- ### Project Overview
+### Project Overview
