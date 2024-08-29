@@ -295,3 +295,6 @@ AND BP.DATE>='2018-01-01'
 AND BP.DATE<'2020-01-01';
 ```
 Explainer: This query helps us to retrieve a list of unique patients who had high blood pressure readings during a specific period (2018-2019) and the medications they were prescribed. The join operations fuses the OBSERVATIONS table (BP) with the MEDICATIONS table (MED) based on a matching PATIENT identifier. The additional condition AND MED.START >= BP.DATE ensures that the medication was started on or after the date of the blood pressure observation. This links the high blood pressure reading to medications that the patient was prescribed afterwards.
+
+### Results/Findings
+The key findings from the analysis include:
