@@ -12,19 +12,42 @@ This repository examines Healthcare Encounter Analysis for the year 2019
 - [References](#references)
 
 ### Project Overview
+This project aims provide a comprehensive analysis of healthcare encounters, treatment and cost analysis for an organization. The end goal is provide results that influence business decisions with respect to throughput (treatment timing), payers behavior and highlight prominent encounters and procedures within the time examined.
+
+### Data Sources
+The dataset used in this project is sourced from Kaggle. It includes information on health insurance claims, policyholders, and other relevant data. 
+
+Data - [Download here]()
+
+### Tools
+MySQL
+
+### Data Cleaning/Preparation
+The data cleaning process involved the following steps:
+
+1. Handling missing values.
+2. Removing duplicates.
+3. Loading the dataset into the SQL database.
+
+## Exploratory Data Analysis
+Exploratory Data Analysis (EDA) was conducted to understand the dataset better and to identify any initial patterns or anomalies. This involved:
+
+- Descriptive statistics
+- Identifying correlations
+
 ### Data Analysis
 To answer business insight questions from the data set, specific SQL queries were deployed
 
 ```sql
 SELECT COUNT(*) As 2019_encounters  -- this line counts the number of records that meet the criteria below
-FROM HEALTHCARE.ENCOUNTERS -- this line identifies the table we want to pull from
-WHERE START>='2019-01-01' -- this line identifies what start dates we want to pull on and after 
-AND START<'2020-01-01'; -- this line makes sure we don't pull farther out than we want
+FROM HEALTHCARE.ENCOUNTERS
+WHERE START>='2019-01-01'
+AND START<'2020-01-01';
 ```
 Explainer: This aggregate query displays the total number of medical encounters that were had in 2019 under a specified table- 2019_encounters as seen in the first line of the query
 
 ```sql
-SELECT COUNT(DISTINCT PATIENT) As 2019_Patients -- by adding a distinct and identifying the column here, we can ensure we don't just count rows
+SELECT COUNT(DISTINCT PATIENT) As 2019_Patients
 FROM HEALTHCARE.ENCOUNTERS
 WHERE START>='2019-01-01'
 AND START<'2020-01-01';
@@ -36,7 +59,7 @@ SELECT *
 FROM HEALTHCARE.ENCOUNTERS
 WHERE START>='2019-01-01'
 AND START<'2020-01-01'
-AND ENCOUNTERCLASS='inpatient'; -- this is how we add an additional criteria
+AND ENCOUNTERCLASS='inpatient';
 ```
 Explainer: The purpose of this query is to display the type of medical service rendered is to inpatients only in 2019
 
@@ -54,7 +77,7 @@ WHERE START>='2019-01-01'
 AND START<'2020-01-01'
 AND ENCOUNTERCLASS IN 
 ('ambulatory','wellness','outpatient',
-'urgentcare'); -- this is how we can add a list of criteria without many new lines of code
+'urgentcare');
 ```
 Explainer: This query consolidates the count of all services rendered in the encounterclass column labeled as 'ambulatory','wellness','outpatient',
 'urgentcare
@@ -64,7 +87,7 @@ SELECT
 GENDER
 ,COUNT(*)
 FROM HEALTHCARE.PATIENTS
-GROUP BY GENDER -- new function introduced called the group by, we want to make sure the column(s) mentioned here also appear in the select statement;
+GROUP BY GENDER;
 ```
 Explainer: This query shows the count across genders specified in the data set. Specifically, it is queried from the patients table
 
@@ -274,8 +297,7 @@ FROM HEALTHCARE.OBSERVATIONS BP
 JOIN HEALTHCARE.ENCOUNTERS ENC ON BP.PATIENT=ENC.PATIENT
 AND ENC.START>=BP.DATE
 JOIN HEALTHCARE.PROVIDERS PRO ON ENC.PROVIDER=PRO.ID
-WHERE 
-((BP.DESCRIPTION = 'Diastolic Blood Pressure' AND BP.VALUE>90)
+WHERE ((BP.DESCRIPTION = 'Diastolic Blood Pressure' AND BP.VALUE>90)
 OR (BP.DESCRIPTION = 'Systolic Blood Pressure' AND BP.VALUE>140))
 AND BP.DATE>='2018-01-01'
 AND BP.DATE<'2020-01-01';
@@ -288,8 +310,7 @@ MED.DESCRIPTION AS MEDICATION
 FROM HEALTHCARE.OBSERVATIONS BP
 JOIN HEALTHCARE.MEDICATIONS MED ON BP.PATIENT=MED.PATIENT
 AND MED.START>=BP.DATE
-WHERE 
-((BP.DESCRIPTION = 'Diastolic Blood Pressure' AND BP.VALUE>90)
+WHERE ((BP.DESCRIPTION = 'Diastolic Blood Pressure' AND BP.VALUE>90)
 OR (BP.DESCRIPTION = 'Systolic Blood Pressure' AND BP.VALUE>140))
 AND BP.DATE>='2018-01-01'
 AND BP.DATE<'2020-01-01';
