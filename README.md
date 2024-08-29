@@ -218,3 +218,80 @@ AND ENC.START<'2020-01-01'
 AND ENC.ENCOUNTERCLASS='emergency') THROUGHPUT
 GROUP BY THROUGHPUT.DESCRIPTION;
 ```
+
+```sql
+SELECT * FROM 
+(SELECT	DESCRIPTION,
+COUNT(*) AS TOTAL_PROCS
+FROM HEALTHCARE.PROCEDURES
+WHERE DATE>='2019-01-01'
+AND DATE<'2020-01-01'
+GROUP BY DESCRIPTION) PROCS
+ORDER BY TOTAL_PROCS DESC;
+```
+Explainer: To retrieve the list of procedures and total number of times each procedure was performed in 2019, this query was deployed. The result is grouped by the description of the procedures and presented in descending order
+
+```sql
+SELECT ENC.ENCOUNTERCLASS,
+COUNT(*) AS TOTAL_PROCS_FOR_CLASS
+FROM HEALTHCARE.PROCEDURES PROCS
+JOIN HEALTHCARE.ENCOUNTERS ENC ON PROCS.ENCOUNTER=ENC.ID
+WHERE DATE>='2019-01-01'
+AND DATE<'2020-01-01'
+GROUP BY ENC.ENCOUNTERCLASS;
+```
+Explainer: To determine the summary total of each procedures across the care setting in 2019, this query is deployed.
+
+```sql
+SELECT ENC.ORGANIZATION,
+COUNT(*) AS TOTAL_PROCS
+FROM HEALTHCARE.PROCEDURES PROCS
+JOIN HEALTHCARE.ENCOUNTERS ENC ON PROCS.ENCOUNTER=ENC.ID
+JOIN HEALTHCARE.ORGANIZATIONS ORG ON ENC.ORGANIZATION=ORG.ID
+WHERE DATE>='2019-01-01'
+AND DATE<'2020-01-01'
+AND ENC.ENCOUNTERCLASS='inpatient'
+GROUP BY ENC.ORGANIZATION;
+```
+Explainer: This query provides data on the organizations that performed the most inpatient procedures in 2019. The join operations matches the procedures table with the encounters table based on the matching encounters ID. It further join the encounters table with the organization table allowing the query to associate each encounter to the corresponding organization where it was performed.
+
+```sql
+SELECT DISTINCT PATIENT
+FROM HEALTHCARE.OBSERVATIONS
+WHERE 
+((DESCRIPTION = 'Diastolic Blood Pressure' AND VALUE>90) 
+OR (DESCRIPTION = 'Systolic Blood Pressure' AND VALUE>140))
+AND DATE>='2018-01-01'
+AND DATE<'2020-01-01';
+```
+Explainer: This query is designed to identify unique patients who had either high diastolic or systolic blood pressure readings between January 1, 2018, and December 31, 2019. It retrieves a list of these patients based on certain criteria related to their blood pressure observations. The output is a list of unique patients who had at least one observation of either: Diastolic Blood Pressure greater than 90, or Systolic Blood Pressure greater than 140 during the specified date range (2018-2019). Each patient who meets the criteria will appear only once in the result set.
+
+```sql
+SELECT DISTINCT BP.PATIENT,
+PRO.NAME AS PROVIDERNAME,
+PRO.SPECIALITY 
+FROM HEALTHCARE.OBSERVATIONS BP
+JOIN HEALTHCARE.ENCOUNTERS ENC ON BP.PATIENT=ENC.PATIENT
+AND ENC.START>=BP.DATE
+JOIN HEALTHCARE.PROVIDERS PRO ON ENC.PROVIDER=PRO.ID
+WHERE 
+((BP.DESCRIPTION = 'Diastolic Blood Pressure' AND BP.VALUE>90)
+OR (BP.DESCRIPTION = 'Systolic Blood Pressure' AND BP.VALUE>140))
+AND BP.DATE>='2018-01-01'
+AND BP.DATE<'2020-01-01';
+```
+Explainer: To determine which providers treated patients with uncontrolled hypertension in 2018 and 2019, the join operations here link blood pressure observations to the healthcare encounters that occurred on or after the observation date and then connect these encounters to the healthcare providers who were responsible for the patient's care.
+
+```sql
+SELECT DISTINCT BP.PATIENT,
+MED.DESCRIPTION AS MEDICATION
+FROM HEALTHCARE.OBSERVATIONS BP
+JOIN HEALTHCARE.MEDICATIONS MED ON BP.PATIENT=MED.PATIENT
+AND MED.START>=BP.DATE
+WHERE 
+((BP.DESCRIPTION = 'Diastolic Blood Pressure' AND BP.VALUE>90)
+OR (BP.DESCRIPTION = 'Systolic Blood Pressure' AND BP.VALUE>140))
+AND BP.DATE>='2018-01-01'
+AND BP.DATE<'2020-01-01';
+```
+Explainer: This query helps us to retrieve a list of unique patients who had high blood pressure readings during a specific period (2018-2019) and the medications they were prescribed. The join operations fuses the OBSERVATIONS table (BP) with the MEDICATIONS table (MED) based on a matching PATIENT identifier. The additional condition AND MED.START >= BP.DATE ensures that the medication was started on or after the date of the blood pressure observation. This links the high blood pressure reading to medications that the patient was prescribed afterwards.
